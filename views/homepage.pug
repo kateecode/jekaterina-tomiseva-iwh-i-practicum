@@ -1,0 +1,31 @@
+
+doctype html
+html
+    head
+        title=title
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(rel="stylesheet", href="/css/style.css")
+    body
+        h1 Movies List
+
+        .actions
+            a(href="/update-cobj").button Add to this table
+
+        .table-wrapper
+            table
+                thead
+                    tr
+                        th Name
+                        th Genres
+                        th Rating
+                tbody
+                    if movies && movies.length
+                        each movie in movies
+                            tr
+                                td= movie.properties.name
+                                td= movie.properties.genres
+                                td= movie.properties.rating
+                    else
+                        tr
+                            td(colspan="3") No movies found
+
