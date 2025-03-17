@@ -1,0 +1,23 @@
+doctype html
+html
+    head
+        title=title
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(rel="stylesheet", href="/css/style.css")
+    body
+        h1 Create/Update Movie
+        .form-wrapper
+            form(action="/update-cobj" method="POST")
+                div
+                    label(for="name") Movie Name:
+                    input(type="text" id="name" name="name" required)
+
+                div
+                    label(for="genres") Genres:
+                    input(type="text" id="genres" name="genres" placeholder="Action, Drama, Comedy")
+
+                div
+                    label(for="rating") Rating:
+                    input(type="number" id="rating" name="rating" min="1" max="10" step="1")
+
+                input(type="submit" value="Create/Update")
