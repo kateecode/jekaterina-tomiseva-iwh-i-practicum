@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -7,8 +8,10 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const CUSTOM_OBJECT_ID = '2-140254989';
+
 // * Please DO NOT INCLUDE the private app access token in your repo. Don't do this practicum in your normal account.
-const PRIVATE_APP_ACCESS = '';
+const PRIVATE_APP_ACCESS = process.env.HUBSPOT_PRIVATE_APP_ACCESS_TOKEN;
 
 // TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
 
@@ -25,6 +28,60 @@ app.get('/update-cobj', (req, res) => {
 // TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
 
 // * Code for Route 3 goes here
+
+app.post('/update-cobj', async (req, res) => {
+    const searchObjectsUrl = `https://api.hubapi.com/crm/v3/objects/${CUSTOM_OBJECT_ID}/search `
+    const updateObjectUrl = `https://api.hubapi.com/crm/v3/objects/${CUSTOM_OBJECT_ID}`
+    const createObjectUrl = `https://api.hubapi.com/crm/v3/objects/${CUSTOM_OBJECT_ID}`
+
+    const { name, genres, rating } = req.body;
+
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    }
+
+    try {
+        const response = await axios.post(searchObjectsUrl, {
+            filterGroups: [
+                {
+                    filters: [
+                        {
+                            propertyName: 'name',
+                            operator: 'EQ',
+                            value: name
+                        }
+                    ]
+                }
+            ]
+        }, { headers });
+
+        const searchResults = response.data.results;
+
+        if (searchResults.length > 0) {
+            await axios.patch(`${updateObjectUrl}/${searchResults[0].id}`, {
+                properties: {
+                    name,
+                    genres,
+                    rating
+                }
+            }, { headers });
+        } else {
+            await axios.post(createObjectUrl, {
+                properties: {
+                    name,
+                    genres,
+                    rating
+                }
+            }, { headers });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error updating custom object');
+    }
+
+    res.redirect('/');
+});
 
 /** 
 * * This is sample code to give you a reference for how you should structure your calls. 
